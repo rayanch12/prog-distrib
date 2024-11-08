@@ -21,6 +21,7 @@ public class CarController {
         cars.add(new Car("Ferrari", "11AA22", 2020, true));
         cars.add(new Car("Tesla", "33CC44", 2021, true));
         cars.add(new Car("Ford", "33CC45", 2021, true));
+        cars.add(new Car("Fiat", "36CC45", 2021, true));
     }
 
     @GetMapping("/cars")
