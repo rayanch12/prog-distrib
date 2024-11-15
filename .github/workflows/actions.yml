@@ -16,3 +16,6 @@ jobs:
         run: |
           export SHELL=/bin/bash
           ./gradlew build
+          docker build -t hello .
+          docker run -p 8080:8080 hello
+          curl --header "Content-Type: application/json" --request POST --data '{"name":"John"}' http://localhost:8080/hello
