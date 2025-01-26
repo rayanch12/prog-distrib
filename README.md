@@ -1,13 +1,14 @@
 # RentaCar Service
 
 ## Description
-RentaCar est une application Spring Boot qui fournit une API REST pour la gestion d'une flotte de voitures. L'application est conteneurisée avec Docker et déployée sur Kubernetes.
+RentaCar est une application Spring Boot qui fournit une API REST pour la gestion d'une flotte de voitures. L'application est conteneurisée avec Docker et déployée sur Kubernetes avec un accès via Ingress.
 
 ## Technologies Utilisées
 - Java 21
 - Spring Boot 3.3.4
 - Docker
 - Kubernetes (Minikube)
+- NGINX Ingress Controller
 - Gradle
 
 ## Structure du Projet
@@ -25,7 +26,8 @@ prog-distrib/
 │                       └── RentacarApplication.java
 ├── k8s/
 │   ├── deployment.yaml
-│   └── service.yaml
+│   ├── service.yaml
+│   └── ingress.yml
 ├── Dockerfile
 ├── build.gradle
 └── README.md
@@ -83,10 +85,49 @@ kubectl get pods
 kubectl get services
 ```
 
-### 5. Accès à l'Application
-L'application est accessible via l'URL fournie par Minikube :
+### 5. Configuration de l'Ingress
+
+#### Activer l'Ingress Controller
 ```bash
-minikube service rentacar-service --url
+minikube addons enable ingress
+```
+
+#### Vérifier l'Installation de l'Ingress Controller
+```bash
+kubectl get pods -n ingress-nginx
+```
+
+#### Déployer l'Ingress
+```bash
+kubectl apply -f k8s/ingress.yml
+```
+
+#### Configurer l'Accès Local
+1. Obtenir l'IP de Minikube :
+```bash
+minikube ip
+```
+
+2. Ajouter l'entrée dans le fichier hosts :
+```bash
+# Sur Linux
+echo "$(minikube ip) rentacar.info" | sudo tee -a /etc/hosts
+
+# Sur Windows
+# Ajouter manuellement dans C:\Windows\System32\drivers\etc\hosts :
+# <minikube-ip> rentacar.info
+```
+
+#### Activer le Tunnel Minikube
+```bash
+minikube addons enable ingress-dns
+minikube tunnel
+```
+
+### 6. Accès à l'Application
+L'application est accessible via :
+```
+http://rentacar.info
 ```
 
 ## Test de l'API
@@ -95,36 +136,36 @@ minikube service rentacar-service --url
 
 1. Obtenir la page d'accueil :
 ```bash
-curl http://192.168.49.2:30000/
+curl http://rentacar.info/
 ```
 
 2. Lister toutes les voitures :
 ```bash
-curl http://192.168.49.2:30000/cars
+curl http://rentacar.info/cars
 ```
 
 3. Ajouter une nouvelle voiture :
 ```bash
 curl -X POST -H "Content-Type: application/json" \
      -d '{"brand":"BMW", "model":"X5", "price":45000}' \
-     http://192.168.49.2:30000/cars
+     http://rentacar.info/cars
 ```
 
 4. Obtenir une voiture spécifique :
 ```bash
-curl http://192.168.49.2:30000/cars/0
+curl http://rentacar.info/cars/0
 ```
 
 5. Mettre à jour une voiture :
 ```bash
 curl -X PUT -H "Content-Type: application/json" \
      -d '{"brand":"BMW", "model":"X5", "price":50000}' \
-     http://192.168.49.2:30000/cars/0
+     http://rentacar.info/cars/0
 ```
 
 6. Supprimer une voiture :
 ```bash
-curl -X DELETE http://192.168.49.2:30000/cars/0
+curl -X DELETE http://rentacar.info/cars/0
 ```
 
 ## Maintenance
@@ -141,11 +182,16 @@ Pour mettre à jour l'application avec une nouvelle version :
 ### Nettoyage
 Pour nettoyer le déploiement :
 ```bash
-kubectl delete -f k8s/deployment.yaml
+kubectl delete -f k8s/ingress.yml
 kubectl delete -f k8s/service.yaml
+kubectl delete -f k8s/deployment.yaml
 ```
 
 ## Dépannage
 - Si les pods ne démarrent pas, vérifier les logs : `kubectl logs <nom-du-pod>`
 - Si le service n'est pas accessible, vérifier le service : `kubectl describe service rentacar-service`
 - Pour les problèmes de stockage Docker : `docker system prune -a`
+- Pour les problèmes d'Ingress :
+  - Vérifier le statut : `kubectl get ingress`
+  - Vérifier les logs : `kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx`
+  - Vérifier que le tunnel est actif : `ps aux | grep "minikube tunnel"
