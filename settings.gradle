@@ -1,1 +1,4 @@
-rootProject.name = 'Rentacar'
+rootProject.name = 'numbers-service'
+
+include 'frontend'
+include 'backend'
