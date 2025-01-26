@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rentacar-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rentacar
+  template:
+    metadata:
+      labels:
+        app: rentacar
+    spec:
+      containers:
+      - name: rentacar
+        image: rayanch1/rentacar:latest
+        ports:
+        - containerPort: 8080
