@@ -1,210 +1,186 @@
-# Application de Gestion de Nombres avec Kubernetes
+# Application de Gestion de Nombres
 
-Cette application est un système distribué de gestion de nombres, construit avec Spring Boot et déployé sur Kubernetes. Elle utilise une architecture microservices avec un frontend, un backend, et une base de données MySQL persistante.
+## Description du Projet
+Cette application permet de gérer une liste de nombres via une interface web moderne. Elle est construite suivant une architecture microservices, utilisant les technologies Docker et Kubernetes.
 
 ## Architecture
-
 L'application est composée de trois composants principaux :
 
-1. **Frontend** (Spring Boot)
-   - Gère l'interface utilisateur
-   - Communique avec le backend via HTTP
-   - Expose les endpoints pour l'utilisateur final
+### 1. Frontend Service
+- **Technologie** : Spring Boot avec HTML/CSS/JavaScript
+- **Fonctionnalités** :
+  - Interface utilisateur moderne et responsive
+  - Formulaire d'ajout de nombres
+  - Affichage en temps réel de la liste des nombres
+- **Exposition** : NodePort (port 31053)
+- **Accès** : Via l'ingress sur `numbers.info`
 
-2. **Backend** (Spring Boot)
-   - Gère la logique métier
-   - Communique avec MySQL
-   - Expose une API REST
-   - Utilise Spring Data JPA pour la persistance
+### 2. Backend Service
+- **Technologie** : Spring Boot (Java)
+- **Fonctionnalités** :
+  - API REST pour la gestion des nombres
+  - Persistance des données via MySQL
+  - Communication avec la base de données
+- **Exposition** : ClusterIP (accès interne uniquement)
+- **Endpoints** :
+  - GET `/api/numbers` : Liste tous les nombres
+  - POST `/api/numbers` : Ajoute un nouveau nombre
 
-3. **MySQL**
-   - Stocke les données de manière persistante
-   - Déployé avec un volume persistant dans Kubernetes
-   - Accessible uniquement depuis le backend
+### 3. Base de Données
+- **Technologie** : MySQL
+- **Configuration** :
+  - Service : ClusterIP (accès interne uniquement)
+  - Persistence des données via Kubernetes Volumes
+  - Port : 3306
 
-## Prérequis
+## Étapes Réalisées
 
+### 1. Service Unique (10/20)
+- ✅ Création d'un service backend simple
+- ✅ Création du Dockerfile
+- ✅ Publication sur Docker Hub
+- ✅ Déploiement Kubernetes
+- ✅ Configuration du service Kubernetes
+
+### 2. Gateway (12/20)
+- ✅ Configuration de l'ingress
+- ✅ Routage vers le service via `numbers.info`
+
+### 3. Second Service (14/20)
+- ✅ Création du frontend
+- ✅ Communication inter-services via REST
+- ✅ Déploiement des deux services
+- ✅ Configuration du réseau Kubernetes
+
+### 4. Base de Données (16/20)
+- ✅ Intégration de MySQL
+- ✅ Configuration de la persistance
+- ✅ Communication sécurisée backend-DB
+
+## Comment Déployer
+
+1. **Cloner le repository** :
+```bash
+git clone [URL_DU_REPO]
+```
+
+2. **Déployer l'application** :
+```bash
+./redeploy.sh
+```
+
+3. **Accéder à l'application** :
+- Ouvrir un navigateur
+- Accéder à `http://numbers.info`
+
+## Architecture Technique
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│   Ingress   │────>│   Frontend   │────>│   Backend   │
+└─────────────┘     └──────────────┘     └──────┬──────┘
+                                                │
+                                         ┌──────┴──────┐
+                                         │    MySQL    │
+                                         └─────────────┘
+```
+
+## Technologies Utilisées
+- Spring Boot
 - Docker
-- Kubernetes (Minikube)
-- kubectl
-- Java 17 ou supérieur
-- Gradle
+- Kubernetes
+- MySQL
+- HTML/CSS/JavaScript
+- REST API
 
-## Configuration Kubernetes
+## Structure du Projet
+```
+prog-distrib/
+├── frontend/                 # Service Frontend
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/        # Code Java
+│   │       └── resources/   # Fichiers statiques (HTML, CSS, JS)
+│   ├── Dockerfile
+│   └── build.gradle
+├── backend/                  # Service Backend
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/        # Code Java
+│   │       └── resources/   # Configuration
+│   ├── Dockerfile
+│   └── build.gradle
+├── k8s/                     # Configuration Kubernetes
+│   ├── frontend/
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   ├── backend/
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   ├── mysql/
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   └── ingress.yaml
+└── redeploy.sh             # Script de déploiement
 
-### Composants déployés
+```
 
-1. **Secrets**
-   - `mysql-secret.yaml` : Stocke les credentials MySQL
+## Commandes Utiles
 
-2. **Stockage**
-   - `mysql-storage.yaml` : Définit le PV et PVC pour MySQL
-
-3. **Déploiements**
-   - `mysql-deployment.yaml` : Déploie MySQL
-   - `backend-deployment.yaml` : Déploie le backend
-   - `frontend-deployment.yaml` : Déploie le frontend
-
-4. **Services**
-   - `mysql-service.yaml` : Expose MySQL (ClusterIP)
-   - `backend-service.yaml` : Expose le backend
-   - `frontend-service.yaml` : Expose le frontend
-
-## Installation et Déploiement
-
-1. **Démarrer Minikube**
-   ```bash
-   minikube start
-   ```
-
-2. **Construire les images Docker**
-   ```bash
-   # Dans le dossier backend
-   ./gradlew build
-   docker build -t rayanch1/numbers-backend:latest .
-   docker push rayanch1/numbers-backend:latest
-
-   # Dans le dossier frontend
-   ./gradlew build
-   docker build -t rayanch1/numbers-frontend:latest .
-   docker push rayanch1/numbers-frontend:latest
-   ```
-
-3. **Déployer MySQL**
-   ```bash
-   kubectl apply -f k8s/mysql-secret.yaml
-   kubectl apply -f k8s/mysql-storage.yaml
-   kubectl apply -f k8s/mysql-deployment.yaml
-   kubectl apply -f k8s/mysql-service.yaml
-   ```
-
-4. **Déployer le Backend et le Frontend**
-   ```bash
-   kubectl apply -f k8s/backend-deployment.yaml
-   kubectl apply -f k8s/backend-service.yaml
-   kubectl apply -f k8s/frontend-deployment.yaml
-   kubectl apply -f k8s/frontend-service.yaml
-   ```
-
-## API Endpoints
-
-### Frontend Endpoints
-
-- `GET /` : Page d'accueil
-- `GET /numbers` : Liste tous les nombres
-- `GET /numbers/{id}` : Affiche un nombre spécifique
-- `POST /numbers` : Ajoute un nouveau nombre
-- `DELETE /numbers/{id}` : Supprime un nombre
-
-### Backend Endpoints
-
-- `GET /api/numbers` : Récupère tous les nombres
-- `GET /api/numbers/{id}` : Récupère un nombre spécifique
-- `POST /api/numbers` : Ajoute un nouveau nombre
-- `DELETE /api/numbers/{id}` : Supprime un nombre
-
-## Structure de la Base de Données
-
-### Table : number
-- `id` : Long (Primary Key, Auto Increment)
-- `value` : Integer
-
-## Tests et Vérification
-
-### Vérifier l'état des pods
+### Surveillance des Services
 ```bash
+# Voir tous les pods
 kubectl get pods
-```
 
-### Vérifier les logs
-```bash
-# Logs MySQL
-kubectl logs <mysql-pod-name>
+# Voir les services
+kubectl get services
 
-# Logs Backend
-kubectl logs <backend-pod-name>
+# Voir les déploiements
+kubectl get deployments
 
-# Logs Frontend
-kubectl logs <frontend-pod-name>
-```
-
-### Tester l'API
-```bash
-# Liste tous les nombres
-curl -H "Host: numbers.info" http://192.168.49.2/numbers
-
-# Ajoute un nombre
-curl -X POST -H "Host: numbers.info" -H "Content-Type: application/json" -d "99" http://192.168.49.2/numbers
-
-# Supprime un nombre
-curl -X DELETE -H "Host: numbers.info" http://192.168.49.2/numbers/{id}
-```
-
-### Accéder à MySQL
-```bash
-# Se connecter à MySQL
-kubectl exec -it <mysql-pod-name> -- mysql -uspringuser -pThePassword db_example
-
-# Vérifier les données
-SELECT * FROM number;
-```
-
-## Dépendances Principales
-
-### Backend
-- Spring Boot Starter Web
-- Spring Boot Starter Data JPA
-- MySQL Connector Java
-- Spring Boot Starter Test
-
-### Frontend
-- Spring Boot Starter Web
-- Spring Boot Starter Thymeleaf
-- Spring Boot Starter Test
-
-## Maintenance et Dépannage
-
-### Redémarrer un déploiement
-```bash
-kubectl rollout restart deployment/<deployment-name>
-```
-
-### Vérifier les logs en temps réel
-```bash
+# Logs en temps réel
 kubectl logs -f <pod-name>
 ```
 
-### Accéder au shell d'un pod
+### Gestion des Déploiements
 ```bash
-kubectl exec -it <pod-name> -- /bin/bash
+# Redéployer un service
+kubectl rollout restart deployment/<deployment-name>
+
+# Vérifier le statut
+kubectl rollout status deployment/<deployment-name>
 ```
 
-### Vérifier la configuration MySQL
-```bash
-kubectl exec -it <mysql-pod-name> -- mysql -u root -ptest1234 -e "SHOW DATABASES;"
-```
+## Captures d'écran
 
-## Sécurité
+### Interface Utilisateur
+![Interface Utilisateur](screenshots/ui.png)
+*Interface web permettant l'ajout et l'affichage des nombres*
 
-- Les credentials MySQL sont stockés dans des secrets Kubernetes
-- MySQL n'est accessible que depuis le backend (ClusterIP)
-- Les communications entre les services sont internes au cluster
+### Logs des Services
+![Logs Backend](screenshots/backend_logs.png)
+*Logs du backend montrant les requêtes HTTP et les opérations de base de données*
 
-## Persistance des Données
+![Logs Frontend](screenshots/frontend_logs.png)
+*Logs du frontend montrant le routage des requêtes et la communication avec le backend*
 
-Les données sont persistantes grâce à :
-- Volume persistant (PV) pour MySQL
-- PersistentVolumeClaim (PVC) lié au PV
-- Stockage monté dans le pod MySQL
+### Base de Données
+![Base de Données](screenshots/database.png)
+*État de la base de données MySQL montrant les nombres stockés*
 
-## Contribution
+## Membres de l'Équipe
+- Étudiant 1 : Baccouche Ines
+- Étudiant 2 : Cherifi Rayan
 
-1. Forker le projet
-2. Créer une branche pour votre fonctionnalité
-3. Commiter vos changements
-4. Pousser vers la branche
-5. Créer une Pull Request
+## Difficultés Rencontrées et Solutions
+1. **Configuration de l'Ingress** :
+   - Problème : Difficulté initiale avec la résolution DNS
+   - Solution : Configuration du fichier hosts et des règles d'ingress
 
-## Licence
+2. **Communication Inter-Services** :
+   - Problème : Erreurs CORS et problèmes de routage
+   - Solution : Mise en place de @CrossOrigin et configuration des services Kubernetes
 
-Ce projet est sous licence MIT.
+3. **Persistance MySQL** :
+   - Problème : Perte de données après redémarrage
+   - Solution : Configuration des volumes persistants Kubernetes

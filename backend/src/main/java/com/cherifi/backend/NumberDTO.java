@@ -1,21 +1,13 @@
 package com.cherifi.backend;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
-public class Number {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class NumberDTO {
     private Long id;
     private int value;
 
-    public Number() {
+    public NumberDTO() {
     }
 
-    public Number(int value) {
+    public NumberDTO(int value) {
         this.value = value;
     }
 

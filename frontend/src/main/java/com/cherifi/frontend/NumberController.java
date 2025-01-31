@@ -1,41 +1,39 @@
 package com.cherifi.frontend;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import java.util.List;
 
-@RestController
-@RequestMapping("/")
+@Controller
+@CrossOrigin(origins = "*")
 public class NumberController {
-    
+
+    private final String backendUrl = "http://backend-service";
     private final RestTemplate restTemplate;
-    
-    @Value("${backend.url}")
-    private String backendUrl;
-    
+
     public NumberController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-    
-    @GetMapping("/numbers")
-    public List<Integer> getAllNumbers() {
-        return restTemplate.getForObject(backendUrl + "/api/numbers", List.class);
+
+    @GetMapping("/")
+    public String index() {
+        return "forward:/index.html";
     }
-    
-    @GetMapping("/numbers/{index}")
-    public Integer getNumber(@PathVariable int index) {
-        return restTemplate.getForObject(backendUrl + "/api/numbers/" + index, Integer.class);
+
+    @GetMapping("/api/numbers")
+    @ResponseBody
+    public List<NumberDTO> getNumbers() {
+        ResponseEntity<NumberDTO[]> response = restTemplate.getForEntity(backendUrl + "/api/numbers", NumberDTO[].class);
+        return List.of(response.getBody());
     }
-    
-    @PostMapping("/numbers")
-    public String addNumber(@RequestBody Integer number) {
-        return restTemplate.postForObject(backendUrl + "/api/numbers", number, String.class);
-    }
-    
-    @DeleteMapping("/numbers/{index}")
-    public String deleteNumber(@PathVariable int index) {
-        restTemplate.delete(backendUrl + "/api/numbers/" + index);
-        return "Nombre supprimé avec succès";
+
+    @PostMapping("/api/numbers")
+    @ResponseBody
+    public ResponseEntity<NumberDTO> addNumber(@RequestBody NumberDTO number) {
+        ResponseEntity<NumberDTO> response = restTemplate.postForEntity(backendUrl + "/api/numbers", number, NumberDTO.class);
+        return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
     }
 }

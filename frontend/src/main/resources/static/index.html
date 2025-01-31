@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Nombres</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestionnaire de Nombres</h1>
+            <p class="subtitle">Une application simple pour gérer vos nombres</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="card">
+                    <h2>Ajouter un nombre</h2>
+                    <div class="input-group">
+                        <input type="number" id="numberInput" placeholder="Entrez un nombre" class="number-input">
+                        <button onclick="addNumber()" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="numbers-section">
+                <div class="card">
+                    <h2>Liste des nombres</h2>
+                    <div class="numbers-container">
+                        <div id="numbersList" class="numbers-grid"></div>
+                    </div>
+                    <button onclick="refreshNumbers()" class="btn btn-secondary">Rafraîchir</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2025 Gestionnaire de Nombres - Tous droits réservés</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

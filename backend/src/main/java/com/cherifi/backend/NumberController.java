@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*")
 public class NumberController {
     
     private final NumberRepository numberRepository;
@@ -21,10 +22,8 @@ public class NumberController {
     }
     
     @GetMapping("/numbers")
-    public List<Integer> getAllNumbers() {
-        return numberRepository.findAll().stream()
-                .map(Number::getValue)
-                .collect(Collectors.toList());
+    public List<Number> getNumbers() {
+        return numberRepository.findAll();
     }
     
     @GetMapping("/numbers/{id}")
@@ -35,10 +34,11 @@ public class NumberController {
     }
     
     @PostMapping("/numbers")
-    public String addNumber(@RequestBody Integer value) {
-        Number number = new Number(value);
+    public Number addNumber(@RequestBody NumberDTO numberDTO) {
+        Number number = new Number();
+        number.setValue(numberDTO.getValue());
         numberRepository.save(number);
-        return "Nombre " + value + " ajouté avec succès";
+        return number;
     }
     
     @DeleteMapping("/numbers/{id}")

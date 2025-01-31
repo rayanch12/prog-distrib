@@ -1,5 +1,12 @@
 server:
   port: 8081
 
+spring:
+  mvc:
+    static-path-pattern: /**
+  web:
+    resources:
+      static-locations: classpath:/static/
+
 backend:
   url: http://backend-service.default.svc.cluster.local
