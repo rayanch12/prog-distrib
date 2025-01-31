@@ -36,12 +36,23 @@ out/
 ### VS Code ###
 .vscode/
 
-### Kubernetes ###
-*.env
+### Compiled files ###
+*.class
+*.jar
+*.war
+*.ear
 
 ### Logs ###
 *.log
 
 ### OS specific ###
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+
+### Kubernetes ###
+kubeconfig.yaml
